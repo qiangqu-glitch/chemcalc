@@ -1,4 +1,4 @@
-var CACHE_NAME = "chemcalc-v5.3";
+var CACHE_NAME = "chemcalc-v0.1";
 var STATIC = ["/", "/index.html"];
 self.addEventListener("install", function(e){
   e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(STATIC);}));
