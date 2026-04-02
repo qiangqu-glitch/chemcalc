@@ -49,7 +49,7 @@ export default {
   async fetch(request) {
     // CORS headers - allow chemcalc.cn and localhost dev
     const origin = request.headers.get('Origin') || '';
-    const allowed = ['https://chemcalc.cn', 'https://www.chemcalc.cn', 'http://localhost:5173', 'http://localhost:3000'];
+    const allowed = ['https://chemcalc.cn', 'https://www.chemcalc.cn', 'https://chem-calc.pages.dev', 'http://localhost:5173', 'http://localhost:3000'];
     const corsOrigin = allowed.includes(origin) ? origin : 'https://chemcalc.cn';
 
     const headers = {

@@ -1,7 +1,7 @@
 {
   "name": "ChemCalc 化学工程计算平台",
   "short_name": "ChemCalc",
-  "description": "Chemical Engineering Calculator | PR/SRK/IAPWS-IF97",
+  "description": "Chemical Engineering Calculator v0.1 | PR/SRK/IAPWS-IF97",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
