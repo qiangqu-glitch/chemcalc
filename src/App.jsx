@@ -2022,7 +2022,7 @@ export default function App() {
   var setOp = function(k,v){setEqRes(null);sOpIn[1](function(p){var o={};for(var x in p)o[x]=p[x];o[k]=v;return o})};
   var sGfIn = useState({am:"1000",t:"25",p:"0.5",nm:"",sm:"",scfm:"",mmscfd:"",activeField:"am"}), gfIn = sGfIn[0];
   var sCvType = useState("liq"), cvType = sCvType[0], setCvType = sCvType[1];
-  var sCvIn = useState({q:"50",g:"1.0",p1:"500",p2:"200",w:"5000",t1:"200",mw:"28.97",gamma:"1.4",z:"1"}), cvIn = sCvIn[0];
+  var sCvIn = useState({q:"50",g:"1.0",p1:"500",p2:"200",w:"5000",t1:"200",mw:"28.97",gamma:"1.4",z:"1",xt:"0.7"}), cvIn = sCvIn[0];
   var setCvI = function(k,v){setEqRes(null);sCvIn[1](function(p){var o={};for(var x in p)o[x]=p[x];o[k]=v;return o})};
   var sVesIn = useState({d:"2",len:"5",h:"1",head:"ellip",orient:"horiz"}), vesIn = sVesIn[0];
   var sInsIn = useState({d:"100",tp:"200",ta:"25",thick:"50",k:"0.04",wind:"3",emis:"0.9",mat:"rockwool"}), insIn = sInsIn[0];
@@ -2924,7 +2924,7 @@ export default function App() {
             {mode==="cvsize"?(function(){
               var iS={flex:1,padding:"10px 12px",backgroundColor:C.white,border:"1.5px solid "+C.border,borderRadius:C.radius,color:C.text,fontSize:14,fontFamily:"monospace",outline:"none",boxSizing:"border-box"};
               var lS={color:C.textL,fontSize:11,minWidth:80,fontWeight:600};
-              var doCV=function(){setEqRes(null);setErr(null);if(cvType==="liq"){var r=calcCvLiq(parseFloat(cvIn.q),parseFloat(cvIn.g),parseFloat(cvIn.p1),parseFloat(cvIn.p2));if(r.err){setErr(r.err);return}setEqRes(Object.assign({cvt:"liq"},r))}else{var r2=calcCvGas(parseFloat(cvIn.w),parseFloat(cvIn.p1),parseFloat(cvIn.p2),parseFloat(cvIn.t1)+273.15,parseFloat(cvIn.mw),parseFloat(cvIn.gamma),parseFloat(cvIn.z));if(r2.err){setErr(r2.err);return}setEqRes(Object.assign({cvt:"gas"},r2))}};
+              var doCV=function(){setEqRes(null);setErr(null);if(cvType==="liq"){var r=calcCvLiq(parseFloat(cvIn.q),parseFloat(cvIn.g),parseFloat(cvIn.p1),parseFloat(cvIn.p2));if(r.err){setErr(r.err);return}setEqRes(Object.assign({cvt:"liq"},r))}else{var r2=calcCvGas(parseFloat(cvIn.w),parseFloat(cvIn.p1),parseFloat(cvIn.p2),parseFloat(cvIn.t1)+273.15,parseFloat(cvIn.mw),parseFloat(cvIn.gamma),parseFloat(cvIn.z),parseFloat(cvIn.xt)||0.7);if(r2.err){setErr(r2.err);return}setEqRes(Object.assign({cvt:"gas"},r2))}};
               return (<div style={{backgroundColor:C.white,borderRadius:C.radius,padding:16,boxShadow:C.shadow,border:"1px solid "+C.border}}>
                 <div style={{fontSize:14,fontWeight:700,color:C.pri,marginBottom:4}}>{lang==="en"?"Control Valve Cv Sizing":"\u63a7\u5236\u9600Cv\u8ba1\u7b97"}</div>
                 <div style={{fontSize:10,color:C.textL,marginBottom:10}}>IEC 60534 / ISA S75</div>
@@ -2939,6 +2939,7 @@ export default function App() {
                     <div style={{display:"flex",gap:6,alignItems:"center"}}><span style={lS}>MW</span><input type="number" value={cvIn.mw} onChange={function(e){setCvI("mw",e.target.value)}} style={iS} /></div>
                     <div style={{display:"flex",gap:6,alignItems:"center"}}><span style={lS}>Cp/Cv</span><input type="number" value={cvIn.gamma} onChange={function(e){setCvI("gamma",e.target.value)}} style={iS} /></div>
                     <div style={{display:"flex",gap:6,alignItems:"center"}}><span style={lS}>Z</span><input type="number" value={cvIn.z} onChange={function(e){setCvI("z",e.target.value)}} style={iS} /></div>
+                    <div style={{display:"flex",gap:6,alignItems:"center"}}><span style={lS}>{lang==="en"?"xT (0.1-0.9)":"压差比xT"}</span><input type="number" step="0.05" value={cvIn.xt} onChange={function(e){setCvI("xt",e.target.value)}} style={iS} /><span style={{fontSize:10,color:C.textL,marginLeft:4}}>{lang==="en"?"globe~0.7":"\u622a\u6b62\u9605~0.7"}</span></div>
                   </div>)}
                   <div style={{display:"flex",gap:6,alignItems:"center"}}><span style={lS}>P1(kPa)</span><input type="number" value={cvIn.p1} onChange={function(e){setCvI("p1",e.target.value)}} style={iS} /></div>
                   <div style={{display:"flex",gap:6,alignItems:"center"}}><span style={lS}>P2(kPa)</span><input type="number" value={cvIn.p2} onChange={function(e){setCvI("p2",e.target.value)}} style={iS} /></div>
@@ -3211,9 +3212,10 @@ export default function App() {
                 if(!comps||comps.length<1){setErr(lang==="en"?"Select at least 1 component":"请选择至少1个组分");return;}
                 var TK=parseFloat(mixIn.t)+273.15, PKPa=parseFloat(mixIn.p)*1000;
                 if(isNaN(TK)||isNaN(PKPa)){setErr("Check T, P");return;}
-                var z=comps.map(function(c){return parseFloat(c.frac)||0});
+                // Use c.mf (same field as VLE); single component defaults to 1.0
+                var z=comps.map(function(c){return comps.length===1?1.0:(parseFloat(c.mf)||0)});
                 var zS=z.reduce(function(a,b){return a+b},0);
-                if(zS<=0){setErr(lang==="en"?"Enter mole fractions":"请输入摩尔分数");return;}
+                if(zS<=0){setErr(lang==="en"?"Enter mole fractions in component selector":"请在组分选择器中输入摩尔分数");return;}
                 z=z.map(function(v){return v/zS});
                 var clist=comps.map(function(c){return COMPS.find(function(x){return x.id===c.id})||c});
                 var res={};
